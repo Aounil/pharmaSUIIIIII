@@ -43,8 +43,7 @@ logs/
 Thumbs.db
 desktop.ini
 
-src/main/java/com/pharmacy/pharmacist/mapper/
-src/main/java/com/pharmacy/pharmacist/observer/
+
 
 
 # ─── JaCoCo / Surefire reports (generated, not source) ───────────────────────
