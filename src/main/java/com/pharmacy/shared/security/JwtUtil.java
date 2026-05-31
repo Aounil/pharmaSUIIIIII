@@ -25,19 +25,28 @@ public class JwtUtil {
     private final long expirationMs;
 
     public JwtUtil(@Value("${app.jwt.secret}") String secret,
-                   @Value("${app.jwt.expiration-ms}") long expirationMs) {
+                   @Value("${app.jwt.expiration-ms:${app.jwt.expiration:86400000}}") long expirationMs) {
         this.secretKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
         this.expirationMs = expirationMs;
     }
 
     public String generateToken(User user) {
-        return Jwts.builder()
+        return generateToken(user, null);
+    }
+
+    public String generateToken(User user, Long pharmacyId) {
+        var builder = Jwts.builder()
                 .setSubject(user.getEmail())
                 .claim("roles", List.of(user.getRole()))
                 .claim("userId", user.getId())
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + expirationMs))
-                .signWith(secretKey, SignatureAlgorithm.HS256)
+                .setExpiration(new Date(System.currentTimeMillis() + expirationMs));
+
+        if (pharmacyId != null) {
+            builder.claim("pharmacyId", pharmacyId);
+        }
+
+        return builder.signWith(secretKey, SignatureAlgorithm.HS256)
                 .compact();
     }
 
@@ -65,6 +74,10 @@ public class JwtUtil {
 
     public Long extractUserId(String token) {
         return parseToken(token).get("userId", Long.class);
+    }
+
+    public Long extractPharmacyId(String token) {
+        return parseToken(token).get("pharmacyId", Long.class);
     }
 
     @SuppressWarnings("unchecked")

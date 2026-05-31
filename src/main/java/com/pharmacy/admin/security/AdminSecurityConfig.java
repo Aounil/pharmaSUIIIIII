@@ -35,6 +35,8 @@ public class AdminSecurityConfig {
                     "/",
                     "/index.html",
                     "/api/v1/auth/**",
+                    // hadi 3la 7ssab login w register dyal pharmacist
+                    "/api/v1/pharmacist/auth/**",
                     "/swagger-ui/**",
                     "/swagger-ui.html",
                     "/v3/api-docs/**"

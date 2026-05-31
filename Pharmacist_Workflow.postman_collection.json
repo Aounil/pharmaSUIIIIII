@@ -1,0 +1,207 @@
+{
+  "info": {
+    "name": "Pharmacist Workflow",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Pharmacist API scenarios for queue management, action updates, and file download."
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "jwt",
+      "value": ""
+    },
+    {
+      "key": "prescriptionId",
+      "value": "1"
+    }
+  ],
+  "item": [
+    {
+      "name": "Pharmacist Login",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"email\": \"pharmacist@example.com\",\n  \"password\": \"password\",\n  \"pharmacyId\": 1\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/pharmacist/auth/login",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "pharmacist",
+            "auth",
+            "login"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Get Pharmacist Queue",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{jwt}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/pharmacist/prescriptions/queue?page=0&size=10",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "pharmacist",
+            "prescriptions",
+            "queue"
+          ],
+          "query": [
+            {
+              "key": "page",
+              "value": "0"
+            },
+            {
+              "key": "size",
+              "value": "10"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "name": "Accept Prescription",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{jwt}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"action\": \"ACCEPT\",\n  \"totalAmount\": 120.00,\n  \"pricingType\": \"INSURANCE\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/pharmacist/prescriptions/{{prescriptionId}}/accept",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "pharmacist",
+            "prescriptions",
+            "{{prescriptionId}}",
+            "accept"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Reject Prescription",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{jwt}}"
+          },
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"action\": \"REJECT\",\n  \"comment\": \"Invalid prescription details\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/pharmacist/prescriptions/{{prescriptionId}}/reject",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "pharmacist",
+            "prescriptions",
+            "{{prescriptionId}}",
+            "reject"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Mark Prescription Ready",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{jwt}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/pharmacist/prescriptions/{{prescriptionId}}/ready",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "pharmacist",
+            "prescriptions",
+            "{{prescriptionId}}",
+            "ready"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Download Prescription File",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{jwt}}"
+          }
+        ],
+        "url": {
+          "raw": "{{baseUrl}}/api/v1/pharmacist/prescriptions/{{prescriptionId}}/file",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "v1",
+            "pharmacist",
+            "prescriptions",
+            "{{prescriptionId}}",
+            "file"
+          ]
+        }
+      }
+    }
+  ]
+}

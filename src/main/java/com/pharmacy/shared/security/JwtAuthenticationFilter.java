@@ -1,5 +1,6 @@
 package com.pharmacy.shared.security;
 
+import com.pharmacy.pharmacist.security.PharmacistPrincipal;
 import com.pharmacy.shared.repository.UserRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -62,7 +63,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                         .map(SimpleGrantedAuthority::new)
                         .collect(Collectors.toList());
 
-                AdminPrincipal principal = new AdminPrincipal(userId, email, authorities);
+                Object principal = createPrincipal(userId, email, roles, jwtUtil.extractPharmacyId(token));
 
                 UsernamePasswordAuthenticationToken authToken =
                         new UsernamePasswordAuthenticationToken(principal, null, authorities);
@@ -74,5 +75,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         filterChain.doFilter(request, response);
+    }
+
+    private Object createPrincipal(Long userId, String email, List<String> roles, Long pharmacyId) {
+        if (roles.stream().anyMatch(role -> "ROLE_PHARMACIST".equalsIgnoreCase(role))) {
+            return new PharmacistPrincipal(userId, email, "ROLE_PHARMACIST", pharmacyId);
+        }
+        return new AdminPrincipal(userId, email, roles.stream()
+                .map(SimpleGrantedAuthority::new)
+                .toList());
     }
 }

@@ -43,8 +43,19 @@ logs/
 Thumbs.db
 desktop.ini
 
+src/main/java/com/pharmacy/pharmacist/controller/
+src/main/java/com/pharmacy/pharmacist/dto/
+src/main/java/com/pharmacy/pharmacist/mapper/
+src/main/java/com/pharmacy/pharmacist/observer/
+src/main/java/com/pharmacy/pharmacist/repository/
+src/main/java/com/pharmacy/pharmacist/security/
+src/main/java/com/pharmacy/pharmacist/service/
+src/main/java/com/pharmacy/pharmacist/strategy/
+
 # ─── JaCoCo / Surefire reports (generated, not source) ───────────────────────
 # (already inside target/, kept here for clarity)
 target/site/
 target/surefire-reports/
 target/jacoco.exec
+
+pharmacist_agent_plan/
