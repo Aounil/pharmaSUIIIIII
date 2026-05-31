@@ -8,6 +8,7 @@ import com.pharmacy.admin.repository.AdminUserRepository;
 import com.pharmacy.shared.repository.PharmacyRepository;
 import com.pharmacy.shared.repository.PrescriptionRepository;
 import com.pharmacy.shared.repository.UserRepository;
+import com.pharmacy.shared.repository.OrderRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,6 +53,9 @@ class PharmacistIntegrationTest {
     private PrescriptionRepository prescriptionRepository;
 
     @Autowired
+    private OrderRepository orderRepository;
+
+    @Autowired
     private PasswordEncoder passwordEncoder;
 
     private User pharmacist;
@@ -61,10 +65,11 @@ class PharmacistIntegrationTest {
 
     @BeforeEach
     void setUp() throws Exception {
+        orderRepository.deleteAll();
         prescriptionRepository.deleteAll();
         adminUserRepository.deleteAll();
-        userRepository.deleteAll();
         pharmacyRepository.deleteAll();
+        userRepository.deleteAll();
 
         pharmacy = new Pharmacy();
         pharmacy.setName("Integration Pharmacy");

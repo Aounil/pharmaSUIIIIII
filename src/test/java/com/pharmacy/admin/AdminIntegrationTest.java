@@ -2,9 +2,12 @@ package com.pharmacy.admin;
 
 import com.pharmacy.admin.entity.AdminUser;
 import com.pharmacy.admin.repository.AdminUserRepository;
+import com.pharmacy.admin.repository.AuditLogRepository;
 import com.pharmacy.shared.entity.Pharmacy;
 import com.pharmacy.shared.entity.User;
+import com.pharmacy.shared.repository.OrderRepository;
 import com.pharmacy.shared.repository.PharmacyRepository;
+import com.pharmacy.shared.repository.PrescriptionRepository;
 import com.pharmacy.shared.repository.UserRepository;
 import com.pharmacy.shared.security.JwtUtil;
 import org.junit.jupiter.api.BeforeEach;
@@ -38,6 +41,15 @@ class AdminIntegrationTest {
     private AdminUserRepository adminUserRepository;
 
     @Autowired
+    private AuditLogRepository auditLogRepository;
+
+    @Autowired
+    private OrderRepository orderRepository;
+
+    @Autowired
+    private PrescriptionRepository prescriptionRepository;
+
+    @Autowired
     private PasswordEncoder passwordEncoder;
 
     @Autowired
@@ -48,6 +60,9 @@ class AdminIntegrationTest {
 
     @BeforeEach
     void setUp() {
+        orderRepository.deleteAll();
+        prescriptionRepository.deleteAll();
+        auditLogRepository.deleteAll();
         adminUserRepository.deleteAll();
         pharmacyRepository.deleteAll();
         userRepository.deleteAll();
