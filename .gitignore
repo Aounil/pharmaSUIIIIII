@@ -43,10 +43,8 @@ logs/
 Thumbs.db
 desktop.ini
 
-src/main/java/com/pharmacy/pharmacist/controller/
 src/main/java/com/pharmacy/pharmacist/mapper/
 src/main/java/com/pharmacy/pharmacist/observer/
-src/main/java/com/pharmacy/pharmacist/repository/
 src/main/java/com/pharmacy/pharmacist/service/
 src/main/java/com/pharmacy/pharmacist/strategy/
 
