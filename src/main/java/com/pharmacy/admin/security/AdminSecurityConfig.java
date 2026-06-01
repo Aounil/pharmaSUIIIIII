@@ -34,6 +34,7 @@ public class AdminSecurityConfig {
                 .requestMatchers(
                     "/",
                     "/index.html",
+                    "/pharmacist.html",
                     "/api/v1/auth/**",
                     // hadi 3la 7ssab login w register dyal pharmacist
                     "/api/v1/pharmacist/auth/**",

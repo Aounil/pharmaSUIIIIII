@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>PharmAdmin - Pharmacist Workspace</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: { DEFAULT: '#0d9488', dark: '#0f766e', light: '#99f6e4', lighter: '#f0fdfa' }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    .sidebar-link.active {
+      background: rgba(13,148,136,0.1);
+      color: #0d9488;
+      border-right: 3px solid #0d9488;
+    }
+    .sidebar-link.active svg { opacity: 1; }
+  </style>
+</head>
+<body class="bg-gray-50 font-sans antialiased">
+
+<div id="login-screen" class="min-h-screen flex items-center justify-center bg-gradient-to-br from-teal-700 to-teal-900 p-4">
+  <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8">
+    <div class="flex flex-col items-center mb-8">
+      <div class="w-16 h-16 bg-teal-600 rounded-2xl flex items-center justify-center mb-4 shadow-lg">
+        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M9 5h6M9 12h6m-6 4h3M5 3h11l3 3v13a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2z"/>
+        </svg>
+      </div>
+      <h1 class="text-2xl font-bold text-gray-800">PharmAdmin</h1>
+      <p class="text-sm text-gray-500 mt-1">Pharmacist Workspace</p>
+    </div>
+
+    <div id="login-error" class="hidden mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700 flex items-center gap-2">
+      <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+      </svg>
+      <span id="login-error-msg"></span>
+    </div>
+
+    <form id="login-form" class="space-y-5">
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1.5">Email address</label>
+        <input id="login-email" type="email" required autocomplete="email"
+               class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none transition text-sm"
+               placeholder="pharmacist@example.com"/>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1.5">Password</label>
+        <input id="login-password" type="password" required autocomplete="current-password"
+               class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none transition text-sm"
+               placeholder="password"/>
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1.5">Pharmacy ID</label>
+        <input id="login-pharmacy-id" type="number" required min="1" inputmode="numeric"
+               class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none transition text-sm"
+               placeholder="1"/>
+      </div>
+      <button type="submit" id="login-btn"
+              class="w-full bg-teal-600 hover:bg-teal-700 disabled:opacity-60 text-white font-semibold py-2.5 rounded-lg transition flex items-center justify-center gap-2">
+        <span>Sign in</span>
+        <svg id="login-spinner" class="hidden animate-spin w-4 h-4 text-white" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+        </svg>
+      </button>
+    </form>
+  </div>
+</div>
+
+<div id="app" class="hidden min-h-screen flex">
+  <aside class="w-64 bg-white border-r border-gray-200 flex flex-col fixed inset-y-0 left-0 z-20 shadow-sm">
+    <div class="h-16 flex items-center px-6 border-b border-gray-100">
+      <div class="w-9 h-9 bg-teal-600 rounded-xl flex items-center justify-center mr-3 shrink-0 shadow">
+        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M9 5h6M9 12h6m-6 4h3M5 3h11l3 3v13a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2z"/>
+        </svg>
+      </div>
+      <div>
+        <p class="font-bold text-gray-800 leading-tight">PharmAdmin</p>
+        <p class="text-xs text-gray-400">Pharmacist Panel</p>
+      </div>
+    </div>
+
+    <nav class="flex-1 px-3 py-5 space-y-1 overflow-y-auto">
+      <p class="px-3 text-[10px] font-semibold text-gray-400 uppercase tracking-widest mb-2">Main</p>
+
+      <a href="#" data-page="queue"
+         class="sidebar-link active flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-100 hover:text-gray-800 transition">
+        <svg class="w-5 h-5 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M9 5h6M9 12h6m-6 4h3M5 3h14v18H5z"/>
+        </svg>
+        Queue
+      </a>
+
+      <a href="#" data-page="history"
+         class="sidebar-link flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-600 hover:bg-gray-100 hover:text-gray-800 transition">
+        <svg class="w-5 h-5 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M12 8v4l3 3m6-3a9 9 0 11-3.3-6.96"/>
+        </svg>
+        History
+      </a>
+    </nav>
+
+    <div class="p-4 border-t border-gray-100">
+      <div class="flex items-center gap-2 mb-3 px-1">
+        <div class="w-8 h-8 bg-teal-100 rounded-full flex items-center justify-center shrink-0">
+          <svg class="w-4 h-4 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+          </svg>
+        </div>
+        <div class="min-w-0">
+          <p id="user-info" class="text-xs font-medium text-gray-700 truncate"></p>
+          <p id="pharmacy-info" class="text-[10px] text-gray-400">Pharmacist</p>
+        </div>
+      </div>
+      <button id="logout-btn"
+              class="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-500 hover:bg-red-50 rounded-lg transition font-medium">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+        </svg>
+        Sign out
+      </button>
+    </div>
+  </aside>
+
+  <main class="ml-64 flex-1 flex flex-col">
+    <header class="h-16 bg-white border-b border-gray-200 flex items-center justify-between px-8 sticky top-0 z-10">
+      <h2 id="page-title" class="text-lg font-semibold text-gray-800">Prescription Queue</h2>
+      <span class="text-xs bg-teal-50 text-teal-700 border border-teal-200 rounded-full px-3 py-1 font-semibold tracking-wide">PHARMACIST</span>
+    </header>
+
+    <div class="flex-1 p-8">
+      <div id="page-queue">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-8">
+          <div class="bg-white rounded-xl border border-gray-200 p-6 flex items-center gap-4 hover:shadow-sm transition">
+            <div class="w-12 h-12 bg-blue-50 rounded-xl flex items-center justify-center shrink-0">
+              <svg class="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5h6M9 12h6m-6 4h3"/>
+              </svg>
+            </div>
+            <div>
+              <p class="text-xs text-gray-500 font-medium uppercase tracking-wide">Incoming Queue</p>
+              <p id="queue-total" class="text-2xl font-bold text-gray-800 mt-0.5">0</p>
+            </div>
+          </div>
+
+          <div class="bg-white rounded-xl border border-gray-200 p-6 flex items-center gap-4 hover:shadow-sm transition">
+            <div class="w-12 h-12 bg-teal-50 rounded-xl flex items-center justify-center shrink-0">
+              <svg class="w-6 h-6 text-teal-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"/>
+              </svg>
+            </div>
+            <div>
+              <p class="text-xs text-gray-500 font-medium uppercase tracking-wide">Page Items</p>
+              <p id="queue-page-count" class="text-2xl font-bold text-gray-800 mt-0.5">0</p>
+            </div>
+          </div>
+
+          <div class="bg-white rounded-xl border border-gray-200 p-6 flex items-center gap-4 hover:shadow-sm transition">
+            <div class="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center shrink-0">
+              <svg class="w-6 h-6 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+              </svg>
+            </div>
+            <div>
+              <p class="text-xs text-gray-500 font-medium uppercase tracking-wide">Ready Actions</p>
+              <p class="text-2xl font-bold text-gray-800 mt-0.5">Active</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-white rounded-xl border border-gray-200">
+          <div class="flex items-center justify-between px-6 py-5 border-b border-gray-100">
+            <h3 class="font-semibold text-gray-800">Received Prescriptions</h3>
+            <button onclick="loadQueue(pagination.queue.current)"
+                    class="inline-flex items-center gap-2 px-3 py-2 text-sm font-semibold text-teal-700 border border-teal-200 rounded-lg hover:bg-teal-50 transition">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M4 4v6h6M20 20v-6h-6M20 9A8 8 0 006.34 4.34M4 15a8 8 0 0013.66 4.66"/>
+              </svg>
+              Refresh
+            </button>
+          </div>
+
+          <div id="queue-loading" class="py-16 flex flex-col items-center gap-3 text-gray-400">
+            <svg class="animate-spin w-7 h-7 text-teal-400" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+            </svg>
+            <span class="text-sm">Loading prescriptions...</span>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+              <thead>
+                <tr class="border-b border-gray-100 bg-gray-50/60">
+                  <th class="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">ID</th>
+                  <th class="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Patient</th>
+                  <th class="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Received</th>
+                  <th class="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Amount</th>
+                  <th class="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Pricing</th>
+                  <th class="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Action</th>
+                </tr>
+              </thead>
+              <tbody id="queue-tbody" class="divide-y divide-gray-50"></tbody>
+            </table>
+          </div>
+
+          <div class="flex items-center justify-between px-6 py-4 border-t border-gray-100">
+            <button id="queue-prev" onclick="changePage('queue', -1)"
+                    class="px-4 py-2 text-sm border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition font-medium text-gray-600">
+              Previous
+            </button>
+            <span id="queue-page-info" class="text-sm text-gray-400"></span>
+            <button id="queue-next" onclick="changePage('queue', 1)"
+                    class="px-4 py-2 text-sm border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition font-medium text-gray-600">
+              Next
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div id="page-history" class="hidden">
+        <div class="bg-white rounded-xl border border-gray-200">
+          <div class="flex items-center justify-between px-6 py-5 border-b border-gray-100">
+            <h3 class="font-semibold text-gray-800">Prescription History</h3>
+            <span id="history-count" class="text-sm text-gray-400"></span>
+          </div>
+
+          <div id="history-loading" class="py-16 flex flex-col items-center gap-3 text-gray-400">
+            <svg class="animate-spin w-7 h-7 text-teal-400" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+            </svg>
+            <span class="text-sm">Loading history...</span>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+              <thead>
+                <tr class="border-b border-gray-100 bg-gray-50/60">
+                  <th class="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">ID</th>
+                  <th class="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Patient</th>
+                  <th class="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
+                  <th class="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Total</th>
+                  <th class="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Updated</th>
+                  <th class="text-left px-6 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Action</th>
+                </tr>
+              </thead>
+              <tbody id="history-tbody" class="divide-y divide-gray-50"></tbody>
+            </table>
+          </div>
+
+          <div class="flex items-center justify-between px-6 py-4 border-t border-gray-100">
+            <button id="history-prev" onclick="changePage('history', -1)"
+                    class="px-4 py-2 text-sm border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition font-medium text-gray-600">
+              Previous
+            </button>
+            <span id="history-page-info" class="text-sm text-gray-400"></span>
+            <button id="history-next" onclick="changePage('history', 1)"
+                    class="px-4 py-2 text-sm border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition font-medium text-gray-600">
+              Next
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<div id="reject-modal" class="hidden fixed inset-0 z-40 bg-gray-900/40 flex items-center justify-center p-4">
+  <div class="w-full max-w-md bg-white rounded-xl shadow-xl border border-gray-200">
+    <div class="px-6 py-5 border-b border-gray-100">
+      <h3 class="font-semibold text-gray-800">Reject Prescription</h3>
+    </div>
+    <form id="reject-form" class="p-6 space-y-4">
+      <input type="hidden" id="reject-id"/>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1.5">Comment</label>
+        <textarea id="reject-comment" required rows="4"
+                  class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none transition text-sm"
+                  placeholder="Missing or invalid information"></textarea>
+      </div>
+      <div class="flex justify-end gap-2">
+        <button type="button" onclick="closeRejectModal()"
+                class="px-4 py-2 text-sm font-semibold text-gray-600 border border-gray-200 rounded-lg hover:bg-gray-50 transition">
+          Cancel
+        </button>
+        <button type="submit"
+                class="px-4 py-2 text-sm font-semibold text-white bg-red-600 rounded-lg hover:bg-red-700 transition">
+          Reject
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div id="toast"
+     class="hidden fixed bottom-5 right-5 z-50 max-w-sm rounded-lg border px-4 py-3 text-sm font-medium shadow-lg"></div>
+
+<script>
+  const API = '/api/v1';
+  let token = localStorage.getItem('pharmacist_token');
+  const pagination = {
+    queue: { current: 0, total: 0 },
+    history: { current: 0, total: 0 }
+  };
+
+  function authHeaders(json = true) {
+    const headers = { Authorization: 'Bearer ' + token };
+    if (json) headers['Content-Type'] = 'application/json';
+    return headers;
+  }
+
+  async function apiFetch(path, opts = {}) {
+    const res = await fetch(API + path, { headers: authHeaders(), ...opts });
+    if (res.status === 401 || res.status === 403) {
+      logout();
+      return null;
+    }
+    return res;
+  }
+
+  function showApp() {
+    document.getElementById('login-screen').classList.add('hidden');
+    document.getElementById('app').classList.remove('hidden');
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      document.getElementById('user-info').textContent = payload.sub || 'Pharmacist';
+      document.getElementById('pharmacy-info').textContent = payload.pharmacyId ? `Pharmacy #${payload.pharmacyId}` : 'Pharmacist';
+    } catch {
+      document.getElementById('user-info').textContent = 'Pharmacist';
+      document.getElementById('pharmacy-info').textContent = 'Pharmacist';
+    }
+    navigateTo('queue');
+  }
+
+  function logout() {
+    token = null;
+    localStorage.removeItem('pharmacist_token');
+    document.getElementById('app').classList.add('hidden');
+    document.getElementById('login-screen').classList.remove('hidden');
+    document.getElementById('login-password').value = '';
+  }
+
+  function navigateTo(page) {
+    document.querySelectorAll('.sidebar-link').forEach(link => {
+      link.classList.toggle('active', link.dataset.page === page);
+    });
+    ['queue', 'history'].forEach(name => {
+      document.getElementById('page-' + name).classList.toggle('hidden', name !== page);
+    });
+    document.getElementById('page-title').textContent =
+      page === 'queue' ? 'Prescription Queue' : 'Prescription History';
+    if (page === 'queue') loadQueue(0);
+    if (page === 'history') loadHistory(0);
+  }
+
+  document.getElementById('login-form').addEventListener('submit', async event => {
+    event.preventDefault();
+    const error = document.getElementById('login-error');
+    const errorMsg = document.getElementById('login-error-msg');
+    const button = document.getElementById('login-btn');
+    const spinner = document.getElementById('login-spinner');
+
+    error.classList.add('hidden');
+    button.disabled = true;
+    spinner.classList.remove('hidden');
+
+    try {
+      const res = await fetch(API + '/pharmacist/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email: document.getElementById('login-email').value.trim(),
+          password: document.getElementById('login-password').value,
+          pharmacyId: Number(document.getElementById('login-pharmacy-id').value)
+        })
+      });
+      if (res.ok) {
+        const data = await res.json();
+        token = data.token;
+        localStorage.setItem('pharmacist_token', token);
+        showApp();
+      } else {
+        const body = await safeJson(res);
+        errorMsg.textContent = body?.error || 'Login failed. Please try again.';
+        error.classList.remove('hidden');
+      }
+    } catch {
+      errorMsg.textContent = 'Cannot reach server. Make sure the application is running.';
+      error.classList.remove('hidden');
+    } finally {
+      button.disabled = false;
+      spinner.classList.add('hidden');
+    }
+  });
+
+  document.getElementById('logout-btn').addEventListener('click', logout);
+
+  document.querySelectorAll('.sidebar-link').forEach(link => {
+    link.addEventListener('click', event => {
+      event.preventDefault();
+      navigateTo(link.dataset.page);
+    });
+  });
+
+  async function loadQueue(page) {
+    const loading = document.getElementById('queue-loading');
+    const tbody = document.getElementById('queue-tbody');
+    loading.classList.remove('hidden');
+    tbody.innerHTML = '';
+
+    const res = await apiFetch(`/pharmacist/prescriptions?page=${page}&size=10`);
+    if (!res || !res.ok) {
+      loading.classList.add('hidden');
+      return;
+    }
+    const data = await res.json();
+    pagination.queue.current = data.number;
+    pagination.queue.total = data.totalPages;
+
+    document.getElementById('queue-total').textContent = data.totalElements.toLocaleString();
+    document.getElementById('queue-page-count').textContent = data.content.length.toLocaleString();
+    setPageControls('queue', data);
+
+    tbody.innerHTML = data.content.length === 0
+      ? '<tr><td colspan="6" class="px-6 py-12 text-center text-gray-400 text-sm">No received prescriptions.</td></tr>'
+      : data.content.map(p => queueRow(p)).join('');
+
+    loading.classList.add('hidden');
+  }
+
+  function queueRow(p) {
+    return `
+      <tr class="hover:bg-gray-50/80 transition align-top">
+        <td class="px-6 py-4 text-gray-400 font-mono text-xs">#${p.id}</td>
+        <td class="px-6 py-4">
+          <div class="font-medium text-gray-800">${esc(p.patientEmail)}</div>
+          <div class="mt-1">${statusBadge(p.status)}</div>
+        </td>
+        <td class="px-6 py-4 text-gray-500 text-xs">${fmtDate(p.createdAt)}</td>
+        <td class="px-6 py-4">
+          <input id="amount-${p.id}" type="number" min="0" step="0.01" value="0.00"
+                 class="w-28 px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none"/>
+        </td>
+        <td class="px-6 py-4">
+          <select id="pricing-${p.id}" class="w-32 px-3 py-2 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-teal-500 focus:border-teal-500 outline-none">
+            <option value="STANDARD">Standard</option>
+            <option value="INSURANCE">Insurance</option>
+            <option value="REDUCED">Reduced</option>
+          </select>
+        </td>
+        <td class="px-6 py-4">
+          <div class="flex flex-wrap gap-2">
+            <button onclick="acceptPrescription(${p.id})" class="px-3 py-1.5 text-xs font-semibold rounded-lg border border-teal-200 text-teal-700 hover:bg-teal-50 transition">Accept</button>
+            <button onclick="openRejectModal(${p.id})" class="px-3 py-1.5 text-xs font-semibold rounded-lg border border-red-200 text-red-600 hover:bg-red-50 transition">Reject</button>
+            <button onclick="downloadPrescriptionFile(${p.id})" class="px-3 py-1.5 text-xs font-semibold rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 transition">File</button>
+          </div>
+        </td>
+      </tr>`;
+  }
+
+  async function loadHistory(page) {
+    const loading = document.getElementById('history-loading');
+    const tbody = document.getElementById('history-tbody');
+    loading.classList.remove('hidden');
+    tbody.innerHTML = '';
+
+    const res = await apiFetch(`/pharmacist/prescriptions/history?page=${page}&size=10`);
+    if (!res || !res.ok) {
+      loading.classList.add('hidden');
+      return;
+    }
+    const data = await res.json();
+    pagination.history.current = data.number;
+    pagination.history.total = data.totalPages;
+
+    document.getElementById('history-count').textContent = `${data.totalElements.toLocaleString()} total`;
+    setPageControls('history', data);
+
+    tbody.innerHTML = data.content.length === 0
+      ? '<tr><td colspan="6" class="px-6 py-12 text-center text-gray-400 text-sm">No prescription history yet.</td></tr>'
+      : data.content.map(p => historyRow(p)).join('');
+
+    loading.classList.add('hidden');
+  }
+
+  function historyRow(p) {
+    return `
+      <tr class="hover:bg-gray-50/80 transition">
+        <td class="px-6 py-4 text-gray-400 font-mono text-xs">#${p.id}</td>
+        <td class="px-6 py-4 font-medium text-gray-800">${esc(p.patientEmail)}</td>
+        <td class="px-6 py-4">${statusBadge(p.status)}</td>
+        <td class="px-6 py-4 text-gray-600">${money(p.totalAmount)}</td>
+        <td class="px-6 py-4 text-gray-500 text-xs">${fmtDate(p.updatedAt)}</td>
+        <td class="px-6 py-4">
+          <div class="flex flex-wrap gap-2">
+            ${p.status === 'IN_PREPARATION'
+              ? `<button onclick="markReady(${p.id})" class="px-3 py-1.5 text-xs font-semibold rounded-lg border border-green-200 text-green-700 hover:bg-green-50 transition">Ready</button>`
+              : ''}
+            <button onclick="downloadPrescriptionFile(${p.id})" class="px-3 py-1.5 text-xs font-semibold rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 transition">File</button>
+          </div>
+        </td>
+      </tr>`;
+  }
+
+  async function acceptPrescription(id) {
+    const totalAmount = Number(document.getElementById(`amount-${id}`).value);
+    const pricingType = document.getElementById(`pricing-${id}`).value;
+    const res = await apiFetch(`/pharmacist/prescriptions/${id}/accept`, {
+      method: 'PATCH',
+      body: JSON.stringify({ action: 'ACCEPT', totalAmount, pricingType })
+    });
+    await handleActionResponse(res, 'Prescription accepted.');
+  }
+
+  function openRejectModal(id) {
+    document.getElementById('reject-id').value = id;
+    document.getElementById('reject-comment').value = '';
+    document.getElementById('reject-modal').classList.remove('hidden');
+    document.getElementById('reject-comment').focus();
+  }
+
+  function closeRejectModal() {
+    document.getElementById('reject-modal').classList.add('hidden');
+  }
+
+  document.getElementById('reject-form').addEventListener('submit', async event => {
+    event.preventDefault();
+    const id = document.getElementById('reject-id').value;
+    const comment = document.getElementById('reject-comment').value.trim();
+    const res = await apiFetch(`/pharmacist/prescriptions/${id}/reject`, {
+      method: 'PATCH',
+      body: JSON.stringify({ action: 'REJECT', comment })
+    });
+    closeRejectModal();
+    await handleActionResponse(res, 'Prescription rejected.');
+  });
+
+  async function markReady(id) {
+    const res = await apiFetch(`/pharmacist/prescriptions/${id}/ready`, { method: 'PATCH' });
+    await handleActionResponse(res, 'Prescription marked ready.');
+  }
+
+  async function handleActionResponse(res, message) {
+    if (!res) return;
+    if (res.ok) {
+      showToast(message, 'success');
+      loadQueue(pagination.queue.current);
+      loadHistory(pagination.history.current);
+      return;
+    }
+    const body = await safeJson(res);
+    showToast(body?.message || body?.error || 'Action failed.', 'error');
+  }
+
+  async function downloadPrescriptionFile(id) {
+    const res = await fetch(API + `/pharmacist/prescriptions/${id}/file`, {
+      headers: authHeaders(false)
+    });
+    if (res.status === 401 || res.status === 403) {
+      logout();
+      return;
+    }
+    if (!res.ok) {
+      const body = await safeJson(res);
+      showToast(body?.message || 'File could not be downloaded.', 'error');
+      return;
+    }
+    const blob = await res.blob();
+    const disposition = res.headers.get('Content-Disposition') || '';
+    const match = disposition.match(/filename="([^"]+)"/);
+    const filename = match ? match[1] : `prescription-${id}`;
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  function changePage(section, delta) {
+    const page = pagination[section];
+    const next = page.current + delta;
+    if (next < 0 || next >= page.total) return;
+    if (section === 'queue') loadQueue(next);
+    if (section === 'history') loadHistory(next);
+  }
+
+  function setPageControls(section, data) {
+    document.getElementById(`${section}-page-info`).textContent =
+      `Page ${data.number + 1} of ${Math.max(data.totalPages, 1)}`;
+    document.getElementById(`${section}-prev`).disabled = data.first;
+    document.getElementById(`${section}-next`).disabled = data.last;
+  }
+
+  function statusBadge(status) {
+    const styles = {
+      RECEIVED: 'bg-blue-50 text-blue-700 border border-blue-200',
+      IN_PREPARATION: 'bg-amber-50 text-amber-700 border border-amber-200',
+      READY: 'bg-green-50 text-green-700 border border-green-200',
+      REJECTED: 'bg-red-50 text-red-700 border border-red-200',
+      PENDING: 'bg-gray-100 text-gray-600 border border-gray-200'
+    };
+    return `<span class="inline-flex px-2.5 py-0.5 rounded-full text-xs font-semibold ${styles[status] || styles.PENDING}">${esc(status || 'UNKNOWN')}</span>`;
+  }
+
+  function showToast(message, type = 'success') {
+    const toast = document.getElementById('toast');
+    toast.textContent = message;
+    toast.className = type === 'error'
+      ? 'fixed bottom-5 right-5 z-50 max-w-sm rounded-lg border px-4 py-3 text-sm font-medium shadow-lg bg-red-50 text-red-700 border-red-200'
+      : 'fixed bottom-5 right-5 z-50 max-w-sm rounded-lg border px-4 py-3 text-sm font-medium shadow-lg bg-teal-50 text-teal-700 border-teal-200';
+    window.clearTimeout(showToast.timer);
+    showToast.timer = window.setTimeout(() => toast.classList.add('hidden'), 3500);
+  }
+
+  async function safeJson(res) {
+    try { return await res.json(); } catch { return null; }
+  }
+
+  function esc(value) {
+    return String(value ?? '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  function fmtDate(iso) {
+    if (!iso) return '-';
+    return new Date(iso).toLocaleString('en-GB', { dateStyle: 'medium', timeStyle: 'short' });
+  }
+
+  function money(value) {
+    if (value == null) return '-';
+    return Number(value).toLocaleString('en-GB', { style: 'currency', currency: 'MAD' });
+  }
+
+  if (token) showApp();
+</script>
+</body>
+</html>

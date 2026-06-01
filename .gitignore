@@ -53,3 +53,4 @@ target/surefire-reports/
 target/jacoco.exec
 
 pharmacist_agent_plan/
+LAUNCH_STEPS.md
