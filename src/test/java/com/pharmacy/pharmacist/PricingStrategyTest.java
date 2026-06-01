@@ -36,7 +36,20 @@ class PricingStrategyTest {
     }
 
     @Test
+    void pricingStrategyFactory_shouldReturnCorrectStrategyForReducedAndNullTypes() {
+        assertThat(PricingStrategyFactory.getStrategy("REDUCED")).isInstanceOf(ReducedPricingStrategy.class);
+        assertThat(PricingStrategyFactory.getStrategy(null)).isInstanceOf(StandardPricingStrategy.class);
+    }
+
+    @Test
     void pricingStrategyFactory_shouldDefaultToStandardStrategyForUnknownType() {
         assertThat(PricingStrategyFactory.getStrategy("UNKNOWN")).isInstanceOf(StandardPricingStrategy.class);
+    }
+
+    @Test
+    void strategies_shouldReturnNullForNullBaseAmount() {
+        assertThat(new StandardPricingStrategy().calculate(null)).isNull();
+        assertThat(new InsurancePricingStrategy().calculate(null)).isNull();
+        assertThat(new ReducedPricingStrategy().calculate(null)).isNull();
     }
 }
